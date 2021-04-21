@@ -2,7 +2,9 @@
 % 4x4 worked for me: horizontal to vertical split
 % checking for top eight to be all zero
 
-M = 4; N = 4;
+% and now 5x5
+
+M = 5; N = 5;
 
 % check the region defined by CHKR_X x CHKR_Y
 CHKR_X = 1:N; CHKR_Y = 1:2;
@@ -19,9 +21,13 @@ T= 0;
 grid_ = ones(M, N);
 grid_(1:M,1:2) = zeros(M,2);
 
-% annealing schedule
-ITS_ = [1000, 50000, 30000, 1000]';
-LAM_ = [  .5,   .05,  .03, .01]';
+% annealing schedule THESE WORK FOR 4x4
+%ITS_ = [1000, 50000, 30000, 1000]';
+%LAM_ = [  .5,   .05,  .03, .01]';
+
+% the following worked after ~ 1min of sim for 5x5
+ITS_ = [30000, 200000, 200000, 10000]';
+LAM_ = [  1,   .05,  .02, .01]';
 S = zeros(length(ITS_), 2);
 
 % ITs_1 | ITs_2 | ...
@@ -41,7 +47,7 @@ for i=1:m
         grid_ = flip_two(grid_,S(i,2));
         
         BB = boundary(grid_);
-        if BB == 4
+        if BB == N
             if sum(grid_(CHKR_Y,CHKR_X), 'all') == 0 ...
                     || sum(grid_(CHKR_Y,CHKR_X), 'all') == 0
                 grid_
