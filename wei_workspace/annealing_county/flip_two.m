@@ -39,9 +39,18 @@ region(Y:Y+DY,X:X+DX) = subreg;
 % check below ratio: <region> is swapped, <g> is original
 % simple difference is a whole lot better, think in terms
 % of scaling this as the region grows on a whole
-RR = boundary(region) - boundary(g);
 
-if testlam < power(lam,RR)  
+CHKY = max(Y-2,1): min(Y+2,m);
+CHKX = max(X-2,1): min(X+2,n);
+
+RR = boundary(region(CHKY,CHKX)) - boundary(g(CHKY,CHKX));
+RR_ = -6:1:6;
+
+%if abs(RR) == 6, disp(region); pause,end
+%power(lam, RR + 6);
+% OR just accept any improvement
+if testlam < power(lam, (RR + 6)/12) ...
+        / sum(power(lam,(RR_ + 6)/12))%power(lam,RR)  
     g(Y:Y+DY,X:X+DX) = subreg;
 end
 

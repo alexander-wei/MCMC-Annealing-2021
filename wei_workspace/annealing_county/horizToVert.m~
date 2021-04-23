@@ -12,7 +12,6 @@
 M = 8; N = 8;
 
 % check the region defined by CHKR_X x CHKR_Y
-global CHKR_Y;
 CHKR_X = 1:N; CHKR_Y = 1:4;
 
 succ = 0;
@@ -22,11 +21,12 @@ count = 0;
 
 % init starting grid
 
-grid_ = initgrid(M,N);
+grid_ = ones(M, N);
+grid_(1:M,CHKR_Y) = zeros(M,length(CHKR_Y));
 
 
 while ~succ
-    [succ, grid_] = horizToVertSim(grid_,CHKR_X,CHKR_Y);
+    succ = horizToVertSim(grid_,CHKR_X,CHKR_Y);
     pause(.05);
     count = count+ 1;
 end
@@ -36,17 +36,11 @@ disp("this took " + count + " iterations")
 
 
 function V = slowcooling(I)
-    V = .1 - .099 * (I ./ length(I));
-end
-
-function G = initgrid(M,N)
-    global CHKR_Y;
-    G = ones(M, N);
-    G(1:M,CHKR_Y) = zeros(M,length(CHKR_Y));
+    V = .6 - .59 * (I ./ length(I));
 end
 
 
-function [T, grid_] = horizToVertSim(grid_,CHKR_X,CHKR_Y)
+function T = horizToVertSim(grid_,CHKR_X,CHKR_Y)
 T= 0;
 
 [M, N] = size(grid_);
@@ -66,19 +60,10 @@ tmix = ceil(2 * log(factorial(M*N)/(factorial(M)*factorial(N))));
 
 Z = ceil(M*N*log(M*N));
 II = repmat([1], 1, Z*tmix);
+ITS_ = [tmixII, tmix*Z];
 %LL = repmat([.8,.5,.2],1,3);
-LL = [slowcooling(1:tmix*Z), .001];
-
-restart = floor(rand()* M * N);
-if restart < 1
-    grid_ = initgrid(M,N);
-    II = tmix; LL = [1,.001];
-elseif restart > floor(rand()* M * N/2)
-    II = 0; LL = [1,.001];
-end
-
-ITS_ = [II, 5*tmix*Z];
-LAM_ = [LL];
+LL = [slowcooling(1:tmix*Z), .01];
+LAM_ = [1, LL];
 
 % this is an improvement, just ~30sec
 % LAM_ = [  1,   .8,  .4, .05]'; <-----
