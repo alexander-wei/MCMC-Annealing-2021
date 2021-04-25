@@ -73,7 +73,7 @@ restart = floor(rand()* M * N);
 if restart < 1 || forceCLEAR
     grid_ = initgrid(M,N);
     II = tmix*Z; LL = [1,.001];
-elseif restart >  1 + floor(rand()* M*N/4)
+elseif restart >  1 + floor(rand()* M)
     II = 0; LL = [1,.001];
 end
 
