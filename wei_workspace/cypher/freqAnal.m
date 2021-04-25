@@ -19,8 +19,8 @@
 
 %compare cipher C to D by frequency
 
-% how much more likely is C than D
-function l = freqAnal(s,C,D)
+% how likely is C
+function l = freqAnal(s,C)
 
     FREQ = zeros(26,1);
     FREQ([5,6,20,23,25]) = [12000, 2500, 9000, 2000, 2000];
@@ -34,15 +34,15 @@ function l = freqAnal(s,C,D)
     FREQ = FREQ ./ sum(FREQ);
     %l = FREQ
     
-    sC = decode(s,C); sD = decode(s,D);
+    sC = decode(s,C);
     
-    ratio = 1;
+    ratio = 0;
     
     for i = 1:length(s)
-        ratio = ratio + FREQ(sC(i)) - FREQ(sD(i));
+        ratio = ratio + FREQ(sC(i));
     end
         
-    l = ratio;
+    l = ratio / length(s) / 0.1128; % .1128 = maxFREQ
 end
 
 
