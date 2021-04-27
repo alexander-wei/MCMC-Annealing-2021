@@ -8,9 +8,7 @@ S_ = strToArray(S);
 
 % annealing schedule Z
 
-
-%s = fileread("TalksWith.txt");
-s = fileread("TreatiseHumanNature.txt");
+s = fileread("TalksWith.txt");
 s = regexprep(lower(s),"[^a-z]","");
 
 global properFREQ;
@@ -27,8 +25,7 @@ properFREQ(properFREQ < .01) = .01;
 % best (<Cipher>, score)
 
 % stage I initialize best cipher tracking
-%G = cypher();
-%bestC = G;
+%bestC = 1:26;
 %bestS = freqAnal(S_,G);
 
 while 1
@@ -37,12 +34,12 @@ while 1
 G = bestC;
  
 % Stage II Schedule
-ITS_ = [0, repmat([1],1,0),500, 2000]'; %1000 -> 10000
-LAM_ = [1, slowcoolings(1:0), bumpcooling(1:500),.01]';
+ITS_ = [0, repmat([1],1,0),500, 1000]';
+LAM_ = [1, slowcoolings(1:0), bumpcooling(1:500),.001]';
 
-% Stage I Schedule -- transposition shuffle mixing time
-%ITS_ = [170, repmat([1],1,200), 500]';
-%LAM_ = [1, slowcoolings(1:200), .01]';
+% Stage I Schedule
+%ITS_ = [500, repmat([1],1,500), 100]';
+%LAM_ = [1, slowcoolings(1:500), .01]';
 
 
 % [.000001, .0000001, .0000001]
@@ -106,8 +103,6 @@ end
 
 
 function V = bumpcooling(I)
-    % V = .05 - .04 * (I ./ length(I));
-    % ^^ worked for the first sample
-     V = .05 - .04 * (I ./ length(I));
+    V = .05 - .04 * (I ./ length(I));
     %V = exp(I ./ length(I) * log(0.01));
 end

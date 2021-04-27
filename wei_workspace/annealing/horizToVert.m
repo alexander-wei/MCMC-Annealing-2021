@@ -9,11 +9,11 @@
 
 % and now 
 
-M = 4; N = 4;
+M = 12; N = 12;
 
 % check the region defined by CHKR_X x CHKR_Y
 global CHKR_Y;
-CHKR_X = 1:N; CHKR_Y = 1:2;
+CHKR_X = 1:N; CHKR_Y = 1:6;
 
 succ = 0;
 

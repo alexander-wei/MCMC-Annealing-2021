@@ -77,6 +77,6 @@ end
 grid_
 
 %figure(1)
-set(0, 'CurrentFigure', 1);
+%set(0, 'CurrentFigure', 1);
 plot(B)
 end

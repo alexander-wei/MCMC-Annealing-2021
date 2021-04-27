@@ -4,11 +4,9 @@
 
 % L is the likelihood (x^2 of theprevious)
 function [C, L, newT] = mutatePair(lam, C, s, L, prevT)
-    R = 0; r = 0;
-    while R == r
+    while
     r = ceil(rand()*26);
     R = ceil(rand()*26);
-    end
     % cipher(R) swap with cipher(r)
     
     D = C;
