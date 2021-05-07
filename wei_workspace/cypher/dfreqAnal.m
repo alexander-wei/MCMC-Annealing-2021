@@ -1,58 +1,42 @@
 % dfreqAnal
 
 
-function [dl, newT] = dfreqAnal(s,C,swap, prevT)
+function [dl, newT] = dfreqAnal(swap, swapped, prevT)
     % pass the previous cipher's prevT and swap rows/cols
     % pass the swap vector (a,b)
-    a = swap(1); b = swap(2);
     
-    global properFREQ; global properFREQm;
-    
-    % sC = decode(s,C);
-    
-    % digram table for decoded sample
-    %TsC = digramFreq(arrayToStr(sC));
+    global properFREQ;
     
     ratio = 0;
-    newT = prevT;
-    temp = prevT(a,:);
-    newT(a,:) = prevT(b,:);
-    newT(b,:) = temp;
     
-    temp = newT(:,a);
-    newT(:,a) = newT(:,b);
-    newT(:,b) = temp;
-%     
-%     TT = zeros(26,2);
-%     TT(:,1) = 1:26;
-%     
-%     T = tabulate(sC);
-%     TT(T(:,1),2) = T(:,3)/100; % percent points
+    newT = prevT;
+    newT(swap,:) = prevT(swapped,:);
+    
+    temp = newT(:,swapped);
+    newT(:,swap) = temp;
     
 % the rows of a, b
-    for K = [a,b]
-    trans_ = properFREQ(K,:) > 0; %...
-        % & newT(K,:) > 0 & prevT(K,:) > 0; wasn't cleaning the digram
-        % tables
+    for K = swap
     ratio = ratio ...
         + ...
         sum(newT(K,:) .* (2 .* properFREQ(K,:) - newT(K,:)) ...
             ./ properFREQ(K,:) ...
         - prevT(K,:) .* (2 .* properFREQ(K,:) - prevT(K,:)) ...% ...
-            ./ properFREQ(K,:));
+            ./ properFREQ(K,:), 'all');
     end
     
     % the columns
-    I = [1:min(a,b)-1, min(a,b)+1: max(a,b)-1, max(a,b)+1: 26]; % avoid doublecounts
-    for K = [a,b]
-    trans_ = properFREQ(I,K) > 0; %...
-         %& newT(I,K) > 0 & prevT(I,K) > 0;
+    %I = [1:min(a,b)-1, min(a,b)+1: max(a,b)-1, max(a,b)+1: 26]; % avoid doublecounts
+    I = 1:26;
+    I(swap) = []; % don't double count
+    
+    for K = swap
     ratio = ratio ...
         + ...
         sum(newT(I,K) .* (2 .*  properFREQ(I,K) - newT(I,K)) ...
              ./ properFREQ(I,K) ...
         - prevT(I,K) .* (2 .*  properFREQ(I,K) - prevT(I,K)) ...
-            ./ properFREQ(I,K));
+            ./ properFREQ(I,K), 'all');
     end
     
     if isnan(ratio)

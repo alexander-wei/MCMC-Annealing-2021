@@ -9,11 +9,11 @@
 
 % and now 
 
-M = 12; N = 12;
+M = 4; N = 4;
 
 % check the region defined by CHKR_X x CHKR_Y
 global CHKR_Y;
-CHKR_X = 1:N; CHKR_Y = 1:6;
+CHKR_X = 1:N; CHKR_Y = 1:2;
 
 succ = 0;
 
@@ -24,10 +24,21 @@ count = 0;
 
 grid_ = initgrid(M,N);
 
-[succ, grid_] = horizToVertSim(grid_,CHKR_X,CHKR_Y,1);
+bd= boundary(grid_);
+
+[succ, grid_,bd, bestB, bestG] = ...
+    horizToVertSim(grid_,CHKR_X,CHKR_Y,1,bd);
+bd
+pause
+%bestBd = bd;
 while ~succ
-    [succ, grid_] = horizToVertSim(grid_,CHKR_X,CHKR_Y,0);
+    if bestB == M, bestB = bd; bestG = grid_; end %avoid getting stuck
+    [succ, grid_,bd, bestB, bestG] = ...
+        horizToVertSim(bestG,CHKR_X,CHKR_Y,0,bestB);
+    
+    bd
     pause(.05);
+    pause
     count = count+ 1;
 end
 

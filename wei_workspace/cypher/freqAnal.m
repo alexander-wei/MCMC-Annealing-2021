@@ -22,19 +22,7 @@
 % how likely is C
 function l = freqAnal(s,C)
 
-    global properFREQ; global properFREQm;
-
-%     FREQ = zeros(26,1);
-%     FREQ([5,6,20,23,25]) = [12000, 2500, 9000, 2000, 2000];
-%     FREQ([1,9,14,15,19]) = [8000,8000,8000,8000,8000];
-%     FREQ([7,16]) = [1700, 1700];
-%     FREQ([8,2,18,22,4,11]) = ...
-%         [6400, 1600, 6200, 1200, 4400, 800];
-%     FREQ([12,17,21,10,24,3,13,26]) = ...
-%         [4000, 500, 3400, 400, 400, 3000, 3000, 200];
-% 
-%     FREQ = FREQ ./ sum(FREQ);
-    %l = FREQ
+    global properFREQ; global keyScores; global keyRank;
     
     sC = decode(s,C);
     
@@ -51,16 +39,30 @@ function l = freqAnal(s,C)
     
     N = length(s);
     
+    % score matrix
+    score_ = zeros(26);
+    
     for i = 1:26
-        % ignore neglible transitions, take only those > 0
-        trans_ = properFREQ(i,:) > 0;% ...
+        % ignore neglible transitions
+        trans_ = 1:26;% ...
         %    & TsC(i,:) > 0;
         %trans_ = 1:26;
         
         aToB = (TsC(i,trans_) - properFREQ(i,trans_)) .^2 ... % ...
             ./ properFREQ(i,trans_);
+        score_(i,:) = aToB;        
+        
         ratio = ratio + sum(aToB);
     end
+    
+    for i = 1:26
+        I = 1:26; I(i) = [];
+        keyScores(i) = sqrt(sum(score_(:,i)) + sum(score_(I,i)));   
+        % reduce extremes
+    end
+    
+    [foo, keyRank] = sort(keyScores);
+    
         
     l = ratio;% / length(s) / 0.1128; % .1128 = maxFREQ
 end

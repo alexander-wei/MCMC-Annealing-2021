@@ -1,7 +1,11 @@
 
 
-function [T, grid_] = horizToVertSim(grid_,CHKR_X,CHKR_Y, forceCLEAR)
+function [T, grid_, bd, bestB, bestG] = horizToVertSim(grid_,CHKR_X,CHKR_Y, ...
+    forceCLEAR, bd)
 T= 0;
+
+bestB = bd;
+bestG = grid_;
 
 [M, N] = size(grid_);
 
@@ -15,24 +19,39 @@ T= 0;
 
 %II = repmat([33000, 33000, 33000],1,3);
 
-tmix = ceil(2 * log(factorial(M*N)/(factorial(M)*factorial(N))));
+%tmix = ceil(2 * log(factorial(M*N)/(factorial(M)*factorial(N))));
+tmix = ceil(2 * M*N * log(M*N));
 %ceil(2*M*N * (M*N - 1) * log(M*N*(M*N-1)));
 
-Z = ceil(M*N*log(M*N));
-II = repmat([1], 1, Z*tmix);
+% Z = ceil(M*N*log(M*N));
+Z = M*N;
+%II = repmat([1], 1, Z*tmix);
 %LL = repmat([.8,.5,.2],1,3);
-LL = [slowcooling(1:tmix*Z), .001];
+%LL = [slowcooling(1:tmix*Z), .001];
+
+II = 0;
+LL = [1];
 
 restart = floor(rand()* M * N);
 if restart < 1 || forceCLEAR
-    grid_ = initgrid(M,N);
-    II = tmix*Z; LL = [1,.001];
-elseif restart >  1 + floor(rand()* M)
-    II = 0; LL = [1,.001];
+   % bestB = 100;
+   grid_ = initgrid(M,N);
+    II = [tmix*Z, repmat([1], 1,tmix*Z)];
+    LL = [1,slowcooling(1:tmix*Z,1)];
 end
 
-ITS_ = [II, 5*tmix*Z];
-LAM_ = [LL];
+%elseif restart >  1 + floor(rand()* M)
+%    II = [0, tmix] ; LL = [1,.01];
+%end
+
+ITS_ = [II, repmat([1],1,tmix * Z), tmix * Z]';
+LAM_ = [LL, slowcooling(1:tmix*Z,2), .001]';
+
+
+%ITS_ = [II, tmix*Z];
+%LAM_ = [LL];
+
+
 
 % this is an improvement, just ~30sec
 % LAM_ = [  1,   .8,  .4, .05]'; <-----
@@ -50,29 +69,39 @@ S(:,2) = LAM_;
 % plot boundaries
 B = zeros(sum(S(:,1)),1);
 
+%bestgrid = zeros(M,N);
+%bestbd = M*N;
+
 current = 1;
+currentB = bd; % M=N
 for i=1:m
     ITS = S(i,1);
     for j=1:ITS
-        grid_ = flip_two(grid_,S(i,2));
+        [grid_, Db] = flip_two(grid_,S(i,2));
         
-        BB = boundary(grid_);
-        if BB == N
-            if sum(grid_(CHKR_Y,CHKR_X), 'all') == 0 ...
-                    || sum(grid_(CHKR_Y,CHKR_X), 'all')...
-                        == length(CHKR_Y) * length(CHKR_X)
-                grid_
-                toc;
-                pause
-                T = 1; return;
-            end
-        end
+        currentB = currentB + Db;
+        if ~restart && currentB < bestB, bestB = currentB; bestG = grid_; end
+        %BB = boundary(grid_);
+        if currentB == N
+             if sum(grid_(CHKR_Y,CHKR_X), 'all') == 0 ...
+                    ||  sum(grid_(CHKR_Y,CHKR_X), 'all')...
+                         == length(CHKR_Y) * length(CHKR_X)
+                 grid_
+%                 toc;
+                 pause
+                 T = 1; return;
+             end
+         end
         
-        B(current) = boundary(grid_);
-        
+        %B(current) = boundary(grid_);
+        B(current) = currentB;
         current = current+1;
     end
 end
+
+bd = B(current-1);
+
+%if ~restart, grid_ = bestG; bd = bestB; end
 
 grid_
 

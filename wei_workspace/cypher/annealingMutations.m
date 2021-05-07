@@ -8,18 +8,15 @@ S_ = strToArray(S);
 
 % annealing schedule Z
 
-
-%s = fileread("TalksWith.txt");
-s = fileread("TreatiseHumanNature.txt");
+%s = fileread("TalksWith.txt"); % works for Discipline book
+s = fileread("TreatiseHumanNature.txt"); % works for sorrel
+%s = fileread("sample_ResearchPaper.txt");
 s = regexprep(lower(s),"[^a-z]","");
 
-global properFREQ;
+global properFREQ; global keyScores; global keyRank;
 properFREQ = digramFreq(s);
 
-% marginal distribution of indiv. letters
-I = 1:26;
-global properFREQm;
-properFREQm = sum(properFREQ(:,I))./sum(sum(properFREQ(:,I)));
+keyScores = zeros(26,1);
 
 properFREQ(properFREQ < .01) = .01;
 %properFREQ(properFREQ < 0.1) = 0;
@@ -32,10 +29,10 @@ properFREQ(properFREQ < .01) = .01;
 %bestS = freqAnal(S_,G);
 
 while 1
-    
+%    pause
 % Stage II reset: 
 G = bestC;
- 
+
 % Stage II Schedule
 ITS_ = [0, repmat([1],1,0),500, 2000]'; %1000 -> 10000
 LAM_ = [1, slowcoolings(1:0), bumpcooling(1:500),.01]';
@@ -66,16 +63,10 @@ for i = 1:length(ITS_)
         end
         [G, L, prevT] = mutatePair(LAM,G,S_, L, prevT);
         
-        if L < bestS, bestS = L; bestC = G; end
-        % arrayToStr(decode(S_,G))
+        if L < bestS, bestS = L; bestC = G; freqAnal(S_,G); end
+
         BB(current) = L;
-%         if contains(arrayToStr(decode(S_,G)),"the") ...
-%                 && contains(arrayToStr(decode(S_,G)),"and") ...
-%                 && contains(arrayToStr(decode(S_,G)),"have") ...
-%                 && contains(arrayToStr(decode(S_,G)),"with")
-            %arrayToStr(decode(S_,G))
-            %pause
-        %end
+
         current = current+1;
     end
 end
@@ -89,11 +80,6 @@ disp("vs best")
 arrayToStr(decode(S_,bestC))
 bestS
 
-
-disp("---")
-if strncmp(ss, "with",4)
-    %pause
-end
 pause(.01);
 end
 

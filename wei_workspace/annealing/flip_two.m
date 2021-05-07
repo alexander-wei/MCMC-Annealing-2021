@@ -2,11 +2,17 @@
 
 % a flip of consecutive assignments
 
-function g = flip_two(region, lam)
+% Db the change in boundary
+function [g, Db] = flip_two(region, lam)
 
 g = region;
 
 [m,n] = size(region);
+
+
+goodswap = false;
+
+while ~goodswap
 
 % vertical or horizontal
 vert = floor(rand() * 2);
@@ -33,6 +39,13 @@ if 1 % todo remove this stub, lamb testing done AFTER swap
     end
 end
 
+if vert && subreg(1,1) ~= subreg(2,1) ...
+        || ~vert && subreg(1,1) ~= subreg(1,2)
+    goodswap = true;
+end
+
+end
+
 % temp assignment before checking lambda and passing
 region(Y:Y+DY,X:X+DX) = subreg;
 
@@ -40,18 +53,22 @@ region(Y:Y+DY,X:X+DX) = subreg;
 % simple difference is a whole lot better, think in terms
 % of scaling this as the region grows on a whole
 
-CHKY = max(Y-2,1): min(Y+2,m);
-CHKX = max(X-2,1): min(X+2,n);
+CHKY = max(Y-2,1): min(Y+DY+2,m);
+CHKX = max(X-2,1): min(X+DY+2,n);
 
 RR = boundary(region(CHKY,CHKX)) - boundary(g(CHKY,CHKX));
+% region(CHKY,CHKX)
+% g(CHKY,CHKX)
 RR_ = -6:1:6;
 
 %if abs(RR) == 6, disp(region); pause,end
 %power(lam, RR + 6);
 % OR just accept any improvement
+Db = 0;
 if testlam < power(lam, (RR + 6)/12) ...
         / sum(power(lam,(RR_ + 6)/12))%power(lam,RR)  
     g(Y:Y+DY,X:X+DX) = subreg;
+    Db = RR;
 end
 
 
