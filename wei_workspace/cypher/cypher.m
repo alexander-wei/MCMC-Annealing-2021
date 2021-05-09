@@ -1,6 +1,4 @@
 
-
-
 % generate random cypher
 
 function C = cypher()
