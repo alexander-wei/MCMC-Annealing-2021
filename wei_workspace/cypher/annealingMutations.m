@@ -1,53 +1,55 @@
 
-%sampleEncode();
-% first generate sample S and starting guess G
-
-%G = 1:26;
+% arguments
+% S: encoded ciphertext
+% stage: 1 or 2 for a two-stage annealing process
+% dict: string of proper english for basis of cipherkey comparisons
+function annealingMutations(S, stage, dict)
 
 S_ = strToArray(S);
 
-% annealing schedule Z
+global properFREQ; global keyScores;
+global bestC; global bestS;
 
-%s = fileread("TalksWith.txt"); % works for Discipline book
-s = fileread("TreatiseHumanNature.txt"); % works for sorrel
-%s = fileread("sample_ResearchPaper.txt");
-s = regexprep(lower(s),"[^a-z]","");
-
-global properFREQ; global keyScores; global keyRank;
-properFREQ = digramFreq(s);
+properFREQ = digramFreq(dict);
 
 keyScores = zeros(26,1);
 
+% irreducibility criterion
 properFREQ(properFREQ < .01) = .01;
-%properFREQ(properFREQ < 0.1) = 0;
 
-% best (<Cipher>, score)
+% annealing with respect to the
+% best pair (<Cipher>, score)
 
 % stage I initialize best cipher tracking
-%G = cypher();
-%bestC = G;
-%bestS = freqAnal(S_,G);
+if stage == 1
+    G = cypher();
+    bestC = G;
+    bestS = freqAnal(S_,G);
+end
 
 while 1
-%    pause
-% Stage II reset: 
-G = bestC;
+% hard coded stopping points for demo purpose
+if stage == 1 && bestS < 60, return; end
 
-% Stage II Schedule
-ITS_ = [0, repmat([1],1,0),500, 2000]'; %1000 -> 10000
-LAM_ = [1, slowcoolings(1:0), bumpcooling(1:500),.01]';
+% schedule selection
+if stage == 1
+    % Stage I Schedule -- transposition shuffle mixing time
+    ITS_ = [170, repmat([1],1,200), 500]';
+    LAM_ = [1, slowcoolings(1:200), .01]';
+elseif stage == 2
+    % Stage II reseed:
+    G = bestC;
+    
+    % Stage II Schedule
+    ITS_ = [500, 2000]'; %1000 -> 10000
+    LAM_ = [bumpcooling(1:500),.01]';
+end
 
-% Stage I Schedule -- transposition shuffle mixing time
-%ITS_ = [170, repmat([1],1,200), 500]';
-%LAM_ = [1, slowcoolings(1:200), .01]';
-
-
-% [.000001, .0000001, .0000001]
 BB = zeros(sum(ITS_),1);
 
 current = 1;
 
-% initialize
+% initialize with frequencies-comparison table
 L = freqAnal(S_,G);
 
 prevT = digramFreq(arrayToStr(decode(strToArray(S),G)));
@@ -61,7 +63,7 @@ for i = 1:length(ITS_)
             prevT = digramFreq(arrayToStr(decode(S_,G)));
             L = freqAnal(S_,G);
         end
-        [G, L, prevT] = mutatePair(LAM,G,S_, L, prevT);
+        [G, L, prevT] = mutatePair(LAM,G, L, prevT);
         
         if L < bestS, bestS = L; bestC = G; freqAnal(S_,G); end
 
@@ -82,18 +84,16 @@ bestS
 
 pause(.01);
 end
-
-
+end
 
 function V = slowcoolings(I)
-    %V = 1 - .99 * (I ./ length(I));
+    % exponential decay for a slow cooling
     V = exp(I ./ length(I) * log(0.01));
 end
 
 
 function V = bumpcooling(I)
-    % V = .05 - .04 * (I ./ length(I));
-    % ^^ worked for the first sample
-     V = .05 - .04 * (I ./ length(I));
-    %V = exp(I ./ length(I) * log(0.01));
+    % small bumps in the near-deterministic optimization Stage II
+    % nudge assignments into place
+    V = .05 - .04 * (I ./ length(I));
 end

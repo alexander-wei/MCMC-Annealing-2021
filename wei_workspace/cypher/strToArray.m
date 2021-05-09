@@ -1,5 +1,4 @@
 
-
 function V = strToArray(s)
     s = char(s);
     V = zeros(length(s),1);

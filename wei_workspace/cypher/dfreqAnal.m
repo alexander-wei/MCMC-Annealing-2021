@@ -1,9 +1,9 @@
-% dfreqAnal
 
-
+% produce the digram frequencies table by only the necc. updates
 function [dl, newT] = dfreqAnal(swap, swapped, prevT)
     % pass the previous cipher's prevT and swap rows/cols
-    % pass the swap vector (a,b)
+    % ---- these are first order transition frequencies (digrams)
+    % pass the swap vector (a,b,...,z)
     
     global properFREQ;
     
@@ -15,7 +15,7 @@ function [dl, newT] = dfreqAnal(swap, swapped, prevT)
     temp = newT(:,swapped);
     newT(:,swap) = temp;
     
-% the rows of a, b
+    % across the rows (a,b,...,z)
     for K = swap
     ratio = ratio ...
         + ...
@@ -25,7 +25,7 @@ function [dl, newT] = dfreqAnal(swap, swapped, prevT)
             ./ properFREQ(K,:), 'all');
     end
     
-    % the columns
+    % down the columns
     %I = [1:min(a,b)-1, min(a,b)+1: max(a,b)-1, max(a,b)+1: 26]; % avoid doublecounts
     I = 1:26;
     I(swap) = []; % don't double count
@@ -42,10 +42,10 @@ function [dl, newT] = dfreqAnal(swap, swapped, prevT)
     if isnan(ratio)
         pause
     end
-   
         
-    dl = -ratio;% / length(s) / 0.1128; % .1128 = maxFREQ
+    dl = -ratio;
     % this is OLDLIKELIHOOD - NEWLIKELIHOOD
+    %           score            score
     
 end
 

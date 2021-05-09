@@ -1,6 +1,5 @@
 
-
-% digram frequency table
+% digram frequency table of a plaintext string <s>
 
 function T = digramFreq(s)
     N = strlength(s);
@@ -15,8 +14,8 @@ function T = digramFreq(s)
         T(a(1),a(2)) = T(a(1),a(2)) + 1;
         a = strToArray(S(A+1:A+2));
         T(a(1),a(2)) = T(a(1),a(2)) + 1;
-        %T(i) = S(A:A+1);
     end
+    % normalize for a distribution of transitions
     for i = 1:26
         if sum(T(i,:)) > 0, T(i,:) = T(i,:) ./ sum(T(i,:)); end
     end

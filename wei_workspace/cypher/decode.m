@@ -1,5 +1,5 @@
 
-
+%  decode ciphertext <v> by cipher C
 function V = decode(v,C)
 I = 1:26;
 

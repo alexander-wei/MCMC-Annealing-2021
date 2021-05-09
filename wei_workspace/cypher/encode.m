@@ -1,6 +1,5 @@
 
-
-%
+% encode plaintext <v> via cipher C
 
 function V = encode(v,C)
 
